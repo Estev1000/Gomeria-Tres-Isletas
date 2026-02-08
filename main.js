@@ -1040,9 +1040,10 @@ document.addEventListener('DOMContentLoaded', () => {
         importInput.value = '';
     };
 
-    function showToast(message) {
+    function showToast(message, type = 'success') {
         const toast = document.createElement('div');
         toast.className = 'toast-notification';
+        if (type === 'error') toast.style.background = '#ef4444';
         toast.textContent = message;
         document.body.appendChild(toast);
         setTimeout(() => {
@@ -1050,6 +1051,31 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => toast.remove(), 500);
         }, 3000);
     }
+
+    // Expose repair functions to global scope for onclick handlers
+    window.switchRepairView = switchRepairView;
+    window.loadRepairDetail = loadRepairDetail;
+    window.updateRepairPrice = updateRepairPrice;
+    window.updateRepairStatus = updateRepairStatus;
+    window.copyRepairLink = copyRepairLink;
+    window.sendRepairWhatsApp = sendRepairWhatsApp;
+    window.downloadRepairStatusImage = downloadRepairStatusImage;
+    window.deleteRepairRecord = deleteRepairRecord;
+    window.getRepairStatusLabel = getRepairStatusLabel;
+
+    // Expose inventory and client functions to global scope
+    window.switchView = switchView;
+    window.renderInventory = renderInventory;
+    window.editProduct = editProduct;
+    window.deleteProduct = deleteProduct;
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.editClient = editClient;
+    window.deleteClient = deleteClient;
+    window.openClientModal = openClientModal;
+    window.closeClientModal = closeClientModal;
+    window.renderClients = renderClients;
+    window.showToast = showToast;
 
     // --- Settings Logic ---
     function loadSettings() {
