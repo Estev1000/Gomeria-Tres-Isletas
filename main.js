@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const repairsView = document.getElementById('repairs-view');
     const repairDetailView = document.getElementById('repair-detail-view');
     const newRepairView = document.getElementById('new-repair-view');
+    const clientView = document.getElementById('client-view');
     const inventoryView = document.getElementById('inventory-view');
     const saleView = document.getElementById('sale-view');
     const reportsView = document.getElementById('reports-view');
@@ -72,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         repairsView.style.display = 'none';
         repairDetailView.style.display = 'none';
         newRepairView.style.display = 'none';
+        clientView.style.display = 'none';
         inventoryView.style.display = 'none';
         saleView.style.display = 'none';
         reportsView.style.display = 'none';
@@ -132,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- REPAIRS FUNCTIONS (GOMERIA) ---
-    function renderRepairs() {
+    function renderRepairs(filterText = '') {
         const listEl = document.getElementById('repair-list');
         if (!listEl) return;
         listEl.innerHTML = '';
@@ -142,7 +144,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        repairs.forEach(r => {
+        const filtered = repairs.filter(r => {
+            const searchTerm = filterText.toLowerCase();
+            return r.deviceModel.toLowerCase().includes(searchTerm) || 
+                   r.clientName.toLowerCase().includes(searchTerm);
+        });
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding:2rem;">No hay reparaciones que coincidan con la búsqueda.</p>';
+            return;
+        }
+
+        filtered.forEach(r => {
             const div = document.createElement('div');
             div.className = 'repair-item';
             div.onclick = () => loadRepairDetail(r.id);
@@ -355,6 +368,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('new-repair-btn').onclick = () => switchRepairView('NewRepair');
+
+    // Search functionality for repairs
+    const repairsSearchInput = document.getElementById('repairs-search');
+    if (repairsSearchInput) {
+        repairsSearchInput.addEventListener('input', (e) => {
+            renderRepairs(e.target.value);
+        });
+    }
 
     navLinks.forEach(li => {
         li.addEventListener('click', (e) => {
@@ -1052,8 +1073,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
+    // --- CLIENT VIEW FUNCTIONS (SHARED STATUS VIEW) ---
+    function flexibleDecode(encoded) {
+        let clean = encoded.trim().split('&')[0].replace(/ /g, '+');
+        try {
+            const bin = atob(clean);
+            const decoded = decodeURIComponent(Array.prototype.map.call(bin, (c) => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(decoded);
+        } catch (e) {
+            return JSON.parse(atob(clean));
+        }
+    }
+
+    function renderClientView(data) {
+        if (!clientView) return;
+        clientView.style.display = 'block';
+        dashboardView.style.display = 'none';
+        repairsView.style.display = 'none';
+        repairDetailView.style.display = 'none';
+        newRepairView.style.display = 'none';
+        inventoryView.style.display = 'none';
+        saleView.style.display = 'none';
+        reportsView.style.display = 'none';
+        clientsView.style.display = 'none';
+        settingsView.style.display = 'none';
+
+        document.getElementById('client-order-id').textContent = `ORDEN #${(data.id || "").slice(-6)}`;
+        document.getElementById('client-device-model').textContent = data.deviceModel || "EQUIPO";
+        document.getElementById('client-name-display').textContent = `CLIENTE: ${data.clientName || ""}`;
+
+        const cost = data.estimatedCost;
+        const displayCost = (cost && cost !== "" && cost !== "0") ? `$ ${cost}` : "$ -";
+        document.getElementById('client-cost').textContent = displayCost;
+
+        const steps = [
+            { k: 'pending', l: 'RECIBIDO' }, 
+            { k: 'working', l: 'EN REPARACION' },
+            { k: 'waiting_parts', l: 'REPUESTOS' }, 
+            { k: 'ready', l: '¡LISTO PARA RETIRAR!' },
+            { k: 'delivered', l: 'ENTREGADO' }
+        ];
+
+        const currentIdx = steps.findIndex(s => s.k === data.status);
+        const container = document.getElementById('client-progress');
+        if (container) {
+            container.innerHTML = '';
+            steps.forEach((s, i) => {
+                const active = i <= currentIdx;
+                const div = document.createElement('div');
+                div.style.cssText = `margin-bottom:1.5rem; display:flex; align-items:center; gap:15px; opacity:${active ? '1' : '0.15'}`;
+                div.innerHTML = `<i class='bx ${active ? 'bxs-check-circle' : 'bx-circle'}' style="color:${active ? 'var(--accent)' : '#64748b'}; font-size:1.8rem;"></i> <span style="font-weight:bold; font-size:1.1rem;">${s.l}</span>`;
+                container.appendChild(div);
+            });
+        }
+    }
+
+    // Check for hash parameters on page load for client view
+    window.addEventListener('hashchange', () => location.reload());
+    
+    const hash = window.location.hash;
+    let dataParam = null;
+    if (hash.includes('v=')) dataParam = hash.split('v=')[1];
+    
+    if (dataParam) {
+        try {
+            const data = flexibleDecode(dataParam);
+            renderClientView(data);
+        } catch (e) {
+            console.error('Error decoding client view:', e);
+            switchView('Panel');
+        }
+    }
+
     // Expose repair functions to global scope for onclick handlers
     window.switchRepairView = switchRepairView;
+    window.renderRepairs = renderRepairs;
     window.loadRepairDetail = loadRepairDetail;
     window.updateRepairPrice = updateRepairPrice;
     window.updateRepairStatus = updateRepairStatus;

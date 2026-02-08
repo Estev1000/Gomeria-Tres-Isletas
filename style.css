@@ -1113,6 +1113,101 @@ tr:last-child td {
     color: white;
 }
 
+/* Repair Items */
+.repairs-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.repair-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-glass);
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.repair-item:hover {
+    background: rgba(59, 130, 246, 0.05);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.1);
+}
+
+.repair-info h3 {
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.repair-info p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    padding: 0.35rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-badge.pending {
+    background: rgba(234, 179, 8, 0.15);
+    color: #fbbf24;
+}
+
+.status-badge.working {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+.status-badge.waiting_parts {
+    background: rgba(249, 115, 22, 0.15);
+    color: #fb923c;
+}
+
+.status-badge.ready {
+    background: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+}
+
+.status-badge.delivered {
+    background: rgba(148, 163, 184, 0.15);
+    color: #cbd5e1;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-glass);
+}
+
+.detail-header h2 {
+    color: var(--text-main);
+    font-size: 1.5rem;
+}
+
+.detail-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.text-muted {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
 #ticket-print-area {
     display: none;
 }
