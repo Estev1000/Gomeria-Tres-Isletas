@@ -4,9 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Data Management ---
     let inventory = JSON.parse(localStorage.getItem('repuestospos_inventory')) || [
         { id: 1, code: 'FIL-1040', name: 'Filtro de Aceite', brand: 'Bosch', category: 'Lubricantes', price: 4500, stock: 25 },
-        { id: 2, code: 'SERV-001', name: 'Cambio de Aceite (Mano de Obra)', brand: 'Taller', category: 'Lubricentro', price: 15000, stock: 999 },
+        { id: 2, code: 'SERV-001', name: 'Cambio de Aceite', brand: 'Servicio', category: 'Mano de Obra', price: 15000, stock: 999 },
         { id: 3, code: 'GOM-PARCHE', name: 'Parche Común', brand: 'Gomería', category: 'Gomeria', price: 5000, stock: 100 },
-        { id: 4, code: 'ACE-5W30', name: 'Aceite 5W30 (1L)', brand: 'Castrol', category: 'Lubricantes', price: 8500, stock: 10 }
+        { id: 4, code: 'ACE-5W30', name: 'Aceite 5W30 (1L)', brand: 'Castrol', category: 'Lubricantes', price: 8500, stock: 10 },
+        { id: 5, code: 'REV-GRAL', name: 'Revisión General', brand: 'Taller', category: 'Taller', price: 10000, stock: 999 },
+        { id: 6, code: 'ALIN-BAL', name: 'Alineación y Balanceo Completa', brand: 'Taller', category: 'Alineacion - Balanceo', price: 12000, stock: 999 }
     ];
 
     let sales = JSON.parse(localStorage.getItem('repuestospos_sales')) || [];
@@ -14,12 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 1, name: 'Taller El Rayo', taxId: '20-30456789-2', phone: '11-4567-8910', email: 'elrayo@taller.mapo' },
         { id: 2, name: 'Juan Repuestos', taxId: '27-12345678-5', phone: '11-2233-4455', email: 'juan@repuestos.com' }
     ];
-    
+
     // --- REPAIRS DATA (GOMERIA) ---
     let repairs = JSON.parse(localStorage.getItem('gomeria_repairs')) || [];
     let currentRepairId = null;
     const GOMERIA_STORE_KEY = 'gomeria_repairs';
-    
+
     let config = JSON.parse(localStorage.getItem('repuestospos_config')) || {
         storeName: 'Gomeria Tres Isletas',
         storeSlogan: 'Gestión Inteligente',
@@ -146,8 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const filtered = repairs.filter(r => {
             const searchTerm = filterText.toLowerCase();
-            return r.deviceModel.toLowerCase().includes(searchTerm) || 
-                   r.clientName.toLowerCase().includes(searchTerm);
+            return r.deviceModel.toLowerCase().includes(searchTerm) ||
+                r.clientName.toLowerCase().includes(searchTerm);
         });
 
         if (filtered.length === 0) {
@@ -327,12 +329,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getRepairStatusLabel(s) {
-        const labels = { 
-            pending: 'EN ESPERA', 
-            working: 'EN TALLER', 
-            waiting_parts: 'REPUESTOS', 
-            ready: '¡LISTO!', 
-            delivered: 'ENTREGADO' 
+        const labels = {
+            pending: 'EN ESPERA',
+            working: 'EN TALLER',
+            waiting_parts: 'REPUESTOS',
+            ready: '¡LISTO!',
+            delivered: 'ENTREGADO'
         };
         return labels[s] || s;
     }
@@ -340,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // New repair form handler
     document.getElementById('new-repair-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        
+
         const name = document.getElementById('clientName').value.trim();
         const phone = document.getElementById('clientPhone').value.trim();
         const model = document.getElementById('deviceModel').value.trim();
@@ -1109,9 +1111,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('client-cost').textContent = displayCost;
 
         const steps = [
-            { k: 'pending', l: 'RECIBIDO' }, 
+            { k: 'pending', l: 'RECIBIDO' },
             { k: 'working', l: 'EN REPARACION' },
-            { k: 'waiting_parts', l: 'REPUESTOS' }, 
+            { k: 'waiting_parts', l: 'REPUESTOS' },
             { k: 'ready', l: '¡LISTO PARA RETIRAR!' },
             { k: 'delivered', l: 'ENTREGADO' }
         ];
@@ -1132,11 +1134,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check for hash parameters on page load for client view
     window.addEventListener('hashchange', () => location.reload());
-    
+
     const hash = window.location.hash;
     let dataParam = null;
     if (hash.includes('v=')) dataParam = hash.split('v=')[1];
-    
+
     if (dataParam) {
         try {
             const data = flexibleDecode(dataParam);
@@ -1261,4 +1263,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Init
     applyBranding();
     updateDashboard();
+
+    // Expose functions to window for HTML onclick access
+    window.switchRepairView = switchRepairView;
+    window.deleteRepairRecord = deleteRepairRecord;
+    window.updateRepairPrice = updateRepairPrice;
+    window.updateRepairStatus = updateRepairStatus;
+    window.copyRepairLink = copyRepairLink;
+    window.sendRepairWhatsApp = sendRepairWhatsApp;
+    window.downloadRepairStatusImage = downloadRepairStatusImage;
 });

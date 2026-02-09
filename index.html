@@ -100,7 +100,8 @@
                         <i class='bx bx-menu'></i>
                     </div>
                     <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
-                        <img src="logo.png" style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
                         <div>
                             <h1>Panel de Gomeria Tres Isletas</h1>
                             <p>Gestión Inteligente</p>
@@ -208,7 +209,8 @@
                         <i class='bx bx-menu'></i>
                     </div>
                     <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
-                        <img src="logo.png" style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
                         <div>
                             <h1>Gestión de Reparaciones</h1>
                             <p>Controla el estado de tus reparaciones en taller.</p>
@@ -219,7 +221,8 @@
                         <input type="text" id="repairs-search" placeholder="Buscar cliente o equipo...">
                     </div>
                     <div class="header-actions">
-                        <button class="primary-btn" id="new-repair-btn"><i class='bx bx-plus'></i> Nueva Reparación</button>
+                        <button class="primary-btn" id="new-repair-btn"><i class='bx bx-plus'></i> Nueva
+                            Reparación</button>
                     </div>
                 </header>
 
@@ -241,7 +244,8 @@
                         <i class='bx bx-menu'></i>
                     </div>
                     <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
-                        <img src="logo.png" style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
                         <div>
                             <h1>Detalle de Reparación</h1>
                         </div>
@@ -261,12 +265,16 @@
                     <div class="actions" style="margin-top: 1.5rem;">
                         <label style="color: var(--text-muted); font-size: 0.9rem;">Presupuesto / Costo ($)</label>
                         <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
-                            <input type="number" id="detail-cost-input" style="flex-grow: 1; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main);" placeholder="0.00">
-                            <button onclick="updateRepairPrice()" class="primary-btn" style="padding: 0 1rem; width: auto; font-size: 0.9rem;">Guardar Precio</button>
+                            <input type="number" id="detail-cost-input"
+                                style="flex-grow: 1; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main);"
+                                placeholder="0.00">
+                            <button onclick="updateRepairPrice()" class="primary-btn"
+                                style="padding: 0 1rem; width: auto; font-size: 0.9rem;">Guardar Precio</button>
                         </div>
 
                         <h3>Actualizar Estado</h3>
-                        <div class="status-buttons" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.5rem;">
+                        <div class="status-buttons"
+                            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.5rem;">
                             <button onclick="updateRepairStatus('pending')" class="status-btn">En Espera</button>
                             <button onclick="updateRepairStatus('working')" class="status-btn">En Taller</button>
                             <button onclick="updateRepairStatus('waiting_parts')" class="status-btn">Repuestos</button>
@@ -278,20 +286,25 @@
                     <div class="share-section" style="border-top: 1px solid var(--border-glass); padding-top: 1.5rem;">
                         <p style="margin-bottom: 1rem;">Opciones para el Cliente:</p>
                         <div class="link-box" style="display: flex; gap: 10px; margin-bottom: 1rem;">
-                            <input type="text" id="share-link" readonly style="flex: 1; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-muted); font-size: 0.8rem;">
-                            <button onclick="copyRepairLink()" class="secondary-btn" title="Copiar Link" style="width: auto;">
+                            <input type="text" id="share-link" readonly
+                                style="flex: 1; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-muted); font-size: 0.8rem;">
+                            <button onclick="copyRepairLink()" class="secondary-btn" title="Copiar Link"
+                                style="width: auto;">
                                 <i class='bx bx-copy'></i> Copiar
                             </button>
-                            <button onclick="sendRepairWhatsApp()" style="background: #25D366; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <button onclick="sendRepairWhatsApp()"
+                                style="background: #25D366; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
                                 <i class='bx bxl-whatsapp'></i> WhatsApp
                             </button>
                         </div>
-                        <button onclick="downloadRepairStatusImage()" class="primary-btn" style="width: 100%; margin-bottom: 1rem;">
+                        <button onclick="downloadRepairStatusImage()" class="primary-btn"
+                            style="width: 100%; margin-bottom: 1rem;">
                             <i class='bx bx-image'></i> DESCARGAR FOTO PARA WHATSAPP
                         </button>
                     </div>
 
-                    <button onclick="deleteRepairRecord()" class="action-btn delete" style="width: 100%; margin-top: 1rem; padding: 12px; height: auto;">
+                    <button onclick="deleteRepairRecord()" class="action-btn delete"
+                        style="width: 100%; margin-top: 1rem; padding: 12px; height: auto;">
                         <i class='bx bx-trash'></i> ELIMINAR REGISTRO
                     </button>
                 </div>
@@ -304,7 +317,8 @@
                         <i class='bx bx-menu'></i>
                     </div>
                     <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
-                        <img src="logo.png" style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
                         <div>
                             <h1>Nueva Reparación</h1>
                             <p>Registra un nuevo ingreso de taller.</p>
@@ -321,26 +335,30 @@
                             <h3><i class='bx bx-user'></i> Datos del Cliente</h3>
                             <div class="form-group" style="margin-bottom: 1rem;">
                                 <label>Nombre</label>
-                                <input type="text" id="clientName" required style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
+                                <input type="text" id="clientName" required
+                                    style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
                             </div>
                             <div class="form-group">
                                 <label>WhatsApp</label>
-                                <input type="tel" id="clientPhone" required style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
+                                <input type="tel" id="clientPhone" required
+                                    style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
                             </div>
                         </div>
-                        
+
                         <div style="margin-bottom: 1.5rem;">
                             <h3><i class='bx bx-device-mobile'></i> Equipo</h3>
                             <div class="form-group" style="margin-bottom: 1rem;">
                                 <label>Modelo / Descripción</label>
-                                <input type="text" id="deviceModel" required style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
+                                <input type="text" id="deviceModel" required
+                                    style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
                             </div>
                             <div class="form-group">
                                 <label>Presupuesto Estimado ($)</label>
-                                <input type="number" id="estimatedCost" style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
+                                <input type="number" id="estimatedCost"
+                                    style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
                             </div>
                         </div>
-                        
+
                         <button type="submit" class="primary-btn" style="width: 100%; padding: 12px; height: auto;">
                             <i class='bx bx-check'></i> Registrar Ingreso
                         </button>
@@ -353,7 +371,8 @@
                         <i class='bx bx-menu'></i>
                     </div>
                     <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
-                        <img src="logo.png" style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
                         <div>
                             <h1>Gestión de Inventario</h1>
                             <p>Administra tus repuestos, stock y precios.</p>
@@ -375,14 +394,12 @@
                         <div class="table-filters">
                             <select id="filter-category" class="styled-select">
                                 <option value="all">Todas las categorías</option>
-                                <option value="Motor">Motor</option>
-                                <option value="Frenos">Frenos</option>
-                                <option value="Subchasis">Subchasis</option>
-                                <option value="Electricidad">Electricidad</option>
+                                <option value="Taller">Taller</option>
                                 <option value="Lubricantes">Lubricantes</option>
-                                <option value="Gomeria">Gomería</option>
+                                <option value="Gomeria">Gomeria</option>
                                 <option value="Lubricentro">Lubricentro</option>
                                 <option value="Mano de Obra">Mano de Obra</option>
+                                <option value="Alineacion - Balanceo">Alineación - Balanceo</option>
                             </select>
                         </div>
                     </div>
@@ -415,7 +432,8 @@
                         <i class='bx bx-menu'></i>
                     </div>
                     <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
-                        <img src="logo.png" style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
                         <div>
                             <h1>Nueva Venta</h1>
                             <p>Busca productos y genera el ticket de venta.</p>
@@ -504,7 +522,8 @@
                         <i class='bx bx-menu'></i>
                     </div>
                     <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
-                        <img src="logo.png" style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
                         <div>
                             <h1>Gestión de Clientes</h1>
                             <p>Administra tu base de datos de clientes y talleres.</p>
@@ -546,7 +565,8 @@
                         <i class='bx bx-menu'></i>
                     </div>
                     <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
-                        <img src="logo.png" style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
                         <div>
                             <h1>Reportes y Estadísticas</h1>
                             <p>Analiza el rendimiento de tu negocio.</p>
@@ -614,7 +634,8 @@
                         <i class='bx bx-menu'></i>
                     </div>
                     <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
-                        <img src="logo.png" style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
                         <div>
                             <h1>Configuración del Sistema</h1>
                             <p>Personaliza tu experiencia y gestiona tus datos.</p>
@@ -667,18 +688,24 @@
 
             <!-- Client View Section -->
             <section id="client-view" style="display: none;">
-                <div class="detail-card" style="text-align: center; max-width: 600px; margin: 3rem auto; padding: 3rem; background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--border-glass);">
-                    <i class='bx bxs-check-circle' style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                <div class="detail-card"
+                    style="text-align: center; max-width: 600px; margin: 3rem auto; padding: 3rem; background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--border-glass);">
+                    <i class='bx bxs-check-circle'
+                        style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;"></i>
                     <h1 style="color: var(--accent); margin-bottom: 0.5rem;">Estado en Vivo</h1>
                     <p id="client-order-id" class="text-muted">Orden #...</p>
                     <h2 id="client-device-model" style="margin: 1rem 0; font-size: 1.8rem;">Cargando...</h2>
                     <p id="client-name-display" class="text-muted" style="margin-bottom: 2rem; font-size: 0.95rem;"></p>
-                    
-                    <div id="client-progress" style="text-align: left; max-width: 400px; margin: 2rem auto; background: var(--bg-color); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-glass);"></div>
-                    
-                    <div class="share-section" style="border-top: 1px solid var(--border-glass); padding-top: 1.5rem; margin-top: 2rem;">
+
+                    <div id="client-progress"
+                        style="text-align: left; max-width: 400px; margin: 2rem auto; background: var(--bg-color); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-glass);">
+                    </div>
+
+                    <div class="share-section"
+                        style="border-top: 1px solid var(--border-glass); padding-top: 1.5rem; margin-top: 2rem;">
                         <p style="margin-bottom: 1rem; color: var(--text-muted);">Costo Estimado</p>
-                        <h2 id="client-cost" style="color: var(--accent); font-size: 2.5rem; margin-top: 0.5rem;">$ -</h2>
+                        <h2 id="client-cost" style="color: var(--accent); font-size: 2.5rem; margin-top: 0.5rem;">$ -
+                        </h2>
                     </div>
                 </div>
             </section>
@@ -710,15 +737,12 @@
                     <div class="form-group">
                         <label for="p-category">Categoría</label>
                         <select id="p-category" required>
-                            <option value="Motor">Motor</option>
-                            <option value="Frenos">Frenos</option>
-                            <option value="Subchasis">Subchasis</option>
-                            <option value="Electricidad">Electricidad</option>
+                            <option value="Taller">Taller</option>
                             <option value="Lubricantes">Lubricantes</option>
-                            <option value="Gomeria">Gomería</option>
+                            <option value="Gomeria">Gomeria</option>
                             <option value="Lubricentro">Lubricentro</option>
                             <option value="Mano de Obra">Mano de Obra</option>
-                            <option value="Efectivo">Accesorios</option>
+                            <option value="Alineacion - Balanceo">Alineación - Balanceo</option>
                         </select>
                     </div>
                     <div class="form-group">
