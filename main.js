@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 2, name: 'Juan Repuestos', taxId: '27-12345678-5', phone: '11-2233-4455', email: 'juan@repuestos.com' }
     ];
 
+    let employees = JSON.parse(localStorage.getItem('repuestospos_employees')) || [];
+
     // --- REPAIRS DATA (GOMERIA) ---
     let repairs = JSON.parse(localStorage.getItem('gomeria_repairs')) || [];
     let currentRepairId = null;
@@ -36,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('repuestospos_inventory', JSON.stringify(inventory));
         localStorage.setItem('repuestospos_sales', JSON.stringify(sales));
         localStorage.setItem('repuestospos_clients', JSON.stringify(clients));
+        localStorage.setItem('repuestospos_employees', JSON.stringify(employees));
         localStorage.setItem('repuestospos_config', JSON.stringify(config));
         localStorage.setItem(GOMERIA_STORE_KEY, JSON.stringify(repairs));
         updateStats();
@@ -52,17 +55,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const saleView = document.getElementById('sale-view');
     const reportsView = document.getElementById('reports-view');
     const clientsView = document.getElementById('clients-view');
+    const employeesView = document.getElementById('employees-view');
     const settingsView = document.getElementById('settings-view');
     const navLinks = document.querySelectorAll('.nav-links li');
 
     const inventoryTableBody = document.querySelector('#inventory-table tbody');
     const clientsTableBody = document.querySelector('#clients-table tbody');
+    const employeesTableBody = document.querySelector('#employees-table tbody');
 
     const productModal = document.getElementById('product-modal');
     const clientModal = document.getElementById('client-modal');
+    const employeeModal = document.getElementById('employee-modal');
 
     const productForm = document.getElementById('product-form');
     const clientForm = document.getElementById('client-form');
+    const employeeForm = document.getElementById('employee-form');
 
     const posProductsList = document.getElementById('pos-products-list');
     const cartItemsList = document.getElementById('cart-items-list');
@@ -80,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saleView.style.display = 'none';
         reportsView.style.display = 'none';
         clientsView.style.display = 'none';
+        employeesView.style.display = 'none';
         settingsView.style.display = 'none';
 
         if (viewName === 'Dashboard' || viewName === 'Panel') {
@@ -103,12 +111,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderPOSProducts();
             refreshCartUI();
+            populateEmployeeSelect();
         } else if (viewName === 'Reportes') {
             reportsView.style.display = 'block';
             updateReports();
         } else if (viewName === 'Clientes') {
             clientsView.style.display = 'block';
             renderClients();
+        } else if (viewName === 'Empleados') {
+            employeesView.style.display = 'block';
+            renderEmployees();
         } else if (viewName === 'Respaldo' || viewName === 'Configuración') {
             settingsView.style.display = 'block';
             loadSettings();
@@ -484,6 +496,21 @@ document.addEventListener('DOMContentLoaded', () => {
     invSearch.addEventListener('input', applyInventoryFilters);
     invFilter.addEventListener('change', applyInventoryFilters);
 
+    function populateEmployeeSelect() {
+        const sel = document.getElementById('pos-employee-select');
+        if (!sel) return;
+
+        const currentValue = sel.value;
+        sel.innerHTML = '<option value="">Sin asignar</option>';
+        employees.forEach(e => {
+            const opt = document.createElement('option');
+            opt.value = String(e.id);
+            opt.textContent = `${e.name} (${Number(e.commissionPercent || 0).toFixed(2)}%)`;
+            sel.appendChild(opt);
+        });
+        sel.value = currentValue;
+    }
+
     // Dashboard Search Logic
     const dashboardSearch = document.getElementById('dashboard-search');
 
@@ -659,6 +686,157 @@ document.addEventListener('DOMContentLoaded', () => {
         closeClientModal();
         renderClients();
     });
+
+    function renderEmployees() {
+        if (!employeesTableBody) return;
+        employeesTableBody.innerHTML = '';
+
+        employees.forEach(e => {
+            const tr = document.createElement('tr');
+            const pct = Number(e.commissionPercent || 0);
+            tr.innerHTML = `
+                <td><strong>${e.name}</strong></td>
+                <td>${pct.toFixed(2)}%</td>
+                <td>
+                    <button class="action-btn" data-action="sales" data-id="${e.id}" title="Ver ventas"><i class='bx bx-receipt'></i></button>
+                    <button class="action-btn edit" data-id="${e.id}" title="Editar"><i class='bx bx-edit-alt'></i></button>
+                    <button class="action-btn delete" data-id="${e.id}" title="Eliminar"><i class='bx bx-trash'></i></button>
+                </td>
+            `;
+            employeesTableBody.appendChild(tr);
+        });
+
+        employeesTableBody.querySelectorAll('button[data-action="sales"]').forEach(btn => {
+            btn.onclick = () => openEmployeeSalesModal(btn.dataset.id);
+        });
+        employeesTableBody.querySelectorAll('.action-btn.edit').forEach(btn => btn.onclick = () => editEmployee(btn.dataset.id));
+        employeesTableBody.querySelectorAll('.action-btn.delete').forEach(btn => btn.onclick = () => deleteEmployee(btn.dataset.id));
+
+        populateEmployeeSelect();
+    }
+
+    const employeeSalesModal = document.getElementById('employee-sales-modal');
+    const employeeSalesHistory = document.getElementById('employee-sales-history');
+
+    function closeEmployeeSalesModal() {
+        if (!employeeSalesModal) return;
+        employeeSalesModal.style.display = 'none';
+    }
+
+    function openEmployeeSalesModal(employeeId) {
+        if (!employeeSalesModal || !employeeSalesHistory) return;
+
+        const emp = employees.find(e => String(e.id) === String(employeeId));
+        const empName = emp ? emp.name : 'Empleado';
+        const empPct = emp ? Number(emp.commissionPercent || 0) : 0;
+
+        const title = document.getElementById('employee-sales-modal-title');
+        if (title) title.textContent = `Ventas de ${empName}`;
+
+        employeeSalesHistory.innerHTML = '';
+        const filteredSales = sales.filter(s => s && String(s.employeeId) === String(employeeId));
+
+        if (filteredSales.length === 0) {
+            employeeSalesHistory.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem;">Sin ventas registradas</td></tr>';
+        } else {
+            filteredSales.forEach(s => {
+                const tr = document.createElement('tr');
+                const dateStr = s.date ? (new Date(s.date).toLocaleDateString() + ' ' + new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })) : '---';
+                const clientDisplay = (s.customer || 'Desconocido') + (s.subClient ? ` (${s.subClient})` : '') + (s.vehicle ? ` - [${s.vehicle}]` : '');
+                const total = Number(s.total || 0);
+
+                const pct = Number(s.employeeCommissionPercent || empPct || 0);
+                const commission = total * (pct / 100);
+
+                tr.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td><strong>${clientDisplay}</strong></td>
+                    <td><small>${s.items || '---'}</small></td>
+                    <td>$${total.toLocaleString()}</td>
+                    <td>$${commission.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                `;
+                employeeSalesHistory.appendChild(tr);
+            });
+        }
+
+        employeeSalesModal.style.display = 'flex';
+    }
+
+    document.querySelectorAll('.close-employee-sales-modal').forEach(btn => btn.onclick = closeEmployeeSalesModal);
+    if (employeeSalesModal) employeeSalesModal.addEventListener('click', (e) => {
+        if (e.target === employeeSalesModal) closeEmployeeSalesModal();
+    });
+
+    function openEmployeeModal(editing = false, data = null) {
+        if (!employeeModal) return;
+        employeeModal.style.display = 'flex';
+        if (editing) {
+            document.getElementById('employee-modal-title').textContent = 'Editar Empleado';
+            document.getElementById('edit-employee-id').value = data.id;
+            document.getElementById('e-name').value = data.name;
+            document.getElementById('e-commission').value = data.commissionPercent;
+        } else {
+            document.getElementById('employee-modal-title').textContent = 'Añadir Nuevo Empleado';
+            employeeForm.reset();
+            document.getElementById('edit-employee-id').value = '';
+        }
+    }
+
+    function closeEmployeeModal() {
+        if (!employeeModal) return;
+        employeeModal.style.display = 'none';
+    }
+
+    if (document.getElementById('add-employee-btn')) {
+        document.getElementById('add-employee-btn').onclick = () => openEmployeeModal();
+    }
+    document.querySelectorAll('.close-employee-modal').forEach(btn => btn.onclick = closeEmployeeModal);
+
+    function editEmployee(id) {
+        const emp = employees.find(e => String(e.id) === String(id));
+        if (!emp) return;
+        openEmployeeModal(true, emp);
+    }
+
+    function deleteEmployee(id) {
+        if (confirm('¿Eliminar empleado?')) {
+            employees = employees.filter(e => String(e.id) !== String(id));
+            saveData();
+            renderEmployees();
+            showToast('Empleado eliminado');
+        }
+    }
+
+    if (employeeForm) {
+        employeeForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-employee-id').value;
+            const commissionPercent = parseFloat(document.getElementById('e-commission').value);
+            if (isNaN(commissionPercent) || commissionPercent < 0) {
+                showToast('Comisión inválida', 'error');
+                return;
+            }
+
+            const employeeData = {
+                id: id ? parseInt(id) : Date.now(),
+                name: document.getElementById('e-name').value,
+                commissionPercent: commissionPercent
+            };
+
+            if (id) {
+                const index = employees.findIndex(e => e.id === parseInt(id));
+                if (index >= 0) employees[index] = employeeData;
+                showToast('Empleado actualizado');
+            } else {
+                employees.push(employeeData);
+                showToast('Empleado agregado');
+            }
+
+            saveData();
+            closeEmployeeModal();
+            renderEmployees();
+        });
+    }
 
     function deleteClient(id) {
         if (confirm('¿Eliminar cliente?')) {
@@ -849,6 +1027,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
         const selectedClientName = document.getElementById('pos-client-select').value;
+        const selectedEmployeeId = document.getElementById('pos-employee-select') ? document.getElementById('pos-employee-select').value : '';
+        const selectedEmployee = selectedEmployeeId ? employees.find(e => String(e.id) === String(selectedEmployeeId)) : null;
         const subClient = document.getElementById('pos-sub-client').value || '';
         const vehiclePlate = document.getElementById('pos-vehicle-plate').value || '';
         const cartForTicket = [...cart];
@@ -860,6 +1040,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const newSale = {
             id: `TRX-${Date.now()}`,
             customer: selectedClientName,
+            employeeId: selectedEmployee ? selectedEmployee.id : null,
+            employeeName: selectedEmployee ? selectedEmployee.name : '',
+            employeeCommissionPercent: selectedEmployee ? Number(selectedEmployee.commissionPercent || 0) : 0,
             subClient: subClient,
             vehicle: vehiclePlate,
             clientPhone: clientPhone,
@@ -888,6 +1071,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveData();
         document.getElementById('pos-sub-client').value = '';
         document.getElementById('pos-vehicle-plate').value = '';
+        if (document.getElementById('pos-employee-select')) document.getElementById('pos-employee-select').value = '';
         refreshCartUI();
 
         // Show Success Modal
@@ -1078,9 +1262,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const clientDisplay = (s.customer || 'Desconocido') + (s.subClient ? ` (${s.subClient})` : '') + (s.vehicle ? ` - [${s.vehicle}]` : '');
             const statusClass = s.method === 'A Cuenta' ? 'pending' : 'completed';
 
+            const employeeDisplay = s.employeeName ? s.employeeName : 'Sin asignar';
+
             tr.innerHTML = `
                 <td>${dateStr}</td>
                 <td><strong>${clientDisplay}</strong></td>
+                <td>${employeeDisplay}</td>
                 <td><small>${s.items || '---'}</small></td>
                 <td><span class="status ${statusClass}">${s.method || 'Efectivo'}</span></td>
                 <td>$${(s.total || 0).toLocaleString()}</td>
@@ -1095,6 +1282,59 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             table.appendChild(tr);
         });
+
+        const summaryBody = document.getElementById('employee-sales-summary');
+        if (summaryBody) {
+            summaryBody.innerHTML = '';
+
+            const totalsByEmployeeKey = new Map();
+            sales.forEach(s => {
+                if (!s) return;
+                const key = s.employeeId ? String(s.employeeId) : '__unassigned__';
+                const prev = totalsByEmployeeKey.get(key) || { total: 0, commission: 0, count: 0 };
+                const total = Number(s.total || 0);
+                const pct = Number(s.employeeCommissionPercent || 0);
+                prev.total += total;
+                prev.commission += total * (pct / 100);
+                prev.count += 1;
+                totalsByEmployeeKey.set(key, prev);
+            });
+
+            const rows = [];
+            totalsByEmployeeKey.forEach((v, key) => {
+                let name = 'Sin asignar';
+                let pct = 0;
+                if (key !== '__unassigned__') {
+                    const emp = employees.find(e => String(e.id) === String(key));
+                    if (emp) {
+                        name = emp.name;
+                        pct = Number(emp.commissionPercent || 0);
+                    } else {
+                        name = 'Empleado eliminado';
+                        pct = 0;
+                    }
+                }
+                rows.push({ key, name, pct, total: v.total, commission: v.commission, count: v.count });
+            });
+
+            rows.sort((a, b) => b.total - a.total);
+
+            if (rows.length === 0) {
+                summaryBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem;">Sin ventas</td></tr>';
+            } else {
+                rows.forEach(r => {
+                    const tr = document.createElement('tr');
+                    const label = r.key === '__unassigned__' ? r.name : `${r.name} (${r.pct.toFixed(2)}%)`;
+                    tr.innerHTML = `
+                        <td><strong>${label}</strong></td>
+                        <td>${r.count || 0}</td>
+                        <td>$${Number(r.total || 0).toLocaleString()}</td>
+                        <td>$${Number(r.commission || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                    `;
+                    summaryBody.appendChild(tr);
+                });
+            }
+        }
 
         document.querySelectorAll('.print-past-sale').forEach(btn => {
             btn.onclick = () => {
@@ -1130,6 +1370,7 @@ document.addEventListener('DOMContentLoaded', () => {
             inventory: inventory,
             sales: sales,
             clients: clients,
+            employees: employees,
             exportDate: new Date().toISOString()
         };
         downloadFile(JSON.stringify(fullData, null, 2), `RepuestosPOS_Backup_${new Date().toISOString().split('T')[0]}.json`, 'application/json');
@@ -1150,6 +1391,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Sheet 3: Clients
         const clientsSheet = XLSX.utils.json_to_sheet(clients);
         XLSX.utils.book_append_sheet(workbook, clientsSheet, "Clientes");
+
+        // Sheet 4: Employees
+        const employeesSheet = XLSX.utils.json_to_sheet(employees);
+        XLSX.utils.book_append_sheet(workbook, employeesSheet, "Empleados");
 
         XLSX.writeFile(workbook, `RepuestosPOS_Backup_${new Date().toISOString().split('T')[0]}.xlsx`);
         showToast('Backup Excel generado');
@@ -1174,7 +1419,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     importedData = {
                         inventory: XLSX.utils.sheet_to_json(workbook.Sheets["Inventario"]),
                         sales: XLSX.utils.sheet_to_json(workbook.Sheets["Ventas"]),
-                        clients: XLSX.utils.sheet_to_json(workbook.Sheets["Clientes"])
+                        clients: XLSX.utils.sheet_to_json(workbook.Sheets["Clientes"]),
+                        employees: workbook.Sheets["Empleados"] ? XLSX.utils.sheet_to_json(workbook.Sheets["Empleados"]) : []
                     };
                 } else {
                     importedData = JSON.parse(event.target.result);
@@ -1185,6 +1431,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         inventory = importedData.inventory;
                         sales = importedData.sales;
                         clients = importedData.clients;
+                        employees = importedData.employees || [];
                         saveData();
                         showToast('Datos cargados con éxito');
                         location.reload();
@@ -1368,6 +1615,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('menu-open-repairs'),
         document.getElementById('menu-open-repair-detail'),
         document.getElementById('menu-open-new-repair'),
+        document.getElementById('menu-open-employees'),
         document.getElementById('menu-open-inv'),
         document.getElementById('menu-open-sale'),
         document.getElementById('menu-open-clients'),

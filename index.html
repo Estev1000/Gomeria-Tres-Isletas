@@ -93,6 +93,12 @@
                 </li>
                 <li>
                     <a href="#">
+                        <i class='bx bxs-id-card'></i>
+                        <span>Empleados</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
                         <i class='bx bxs-report'></i>
                         <span>Reportes</span>
                     </a>
@@ -394,6 +400,47 @@
                     </form>
                 </div>
             </section>
+
+            <section id="employees-view" style="display: none;">
+                <header>
+                    <div class="mobile-menu-toggle" id="menu-open-employees">
+                        <i class='bx bx-menu'></i>
+                    </div>
+                    <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <div>
+                            <h1>Gestión de Empleados</h1>
+                            <p>Configura comisiones por venta para cada empleado.</p>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="primary-btn" id="add-employee-btn"><i class='bx bx-user-plus'></i> Nuevo
+                            Empleado</button>
+                    </div>
+                </header>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Lista de Empleados</h3>
+                    </div>
+                    <div class="table-container">
+                        <table id="employees-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Comisión</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamic Employees Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <section id="inventory-view" style="display: none;">
                 <header>
                     <div class="mobile-menu-toggle" id="menu-open-inv">
@@ -531,6 +578,14 @@
                                 <option value="Consumidor Final">Consumidor Final</option>
                                 <!-- Dynamic Clients here -->
                             </select>
+                            <label
+                                style="display: block; font-size: 0.85rem; color: var(--text-muted); margin: 10px 0 0.75rem;">Empleado
+                                / Vendedor</label>
+                            <select id="pos-employee-select" class="styled-select full-width"
+                                style="margin-bottom: 10px;">
+                                <option value="">Sin asignar</option>
+                                <!-- Dynamic Employees here -->
+                            </select>
                             <div style="display: flex; gap: 10px;">
                                 <input type="text" id="pos-sub-client" class="styled-select"
                                     placeholder="Nombre del cliente (Opcional)"
@@ -661,6 +716,7 @@
                                 <tr>
                                     <th>Fecha</th>
                                     <th>Transacción</th>
+                                    <th>Empleado</th>
                                     <th>Artículos</th>
                                     <th>Método</th>
                                     <th>Total</th>
@@ -668,6 +724,27 @@
                             </thead>
                             <tbody id="full-sales-history">
                                 <!-- Dynamic Sales -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Ventas por Empleado</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Empleado</th>
+                                    <th>Ventas</th>
+                                    <th>Total Vendido</th>
+                                    <th>Comisión</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employee-sales-summary">
+                                <!-- Dynamic Employee Summary -->
                             </tbody>
                         </table>
                     </div>
@@ -841,6 +918,57 @@
                     <button type="submit" class="primary-btn">Guardar Cliente</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div id="employee-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="employee-modal-title">Añadir Nuevo Empleado</h2>
+                <i class='bx bx-x close-employee-modal'></i>
+            </div>
+            <form id="employee-form">
+                <input type="hidden" id="edit-employee-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="e-name">Nombre</label>
+                        <input type="text" id="e-name" required placeholder="Ej: Juan / María">
+                    </div>
+                    <div class="form-group">
+                        <label for="e-commission">Comisión (%)</label>
+                        <input type="number" id="e-commission" required step="0.01" placeholder="0">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="secondary-btn close-employee-modal">Cancelar</button>
+                    <button type="submit" class="primary-btn">Guardar Empleado</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="employee-sales-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 id="employee-sales-modal-title">Ventas del Empleado</h2>
+                <i class='bx bx-x close-employee-sales-modal'></i>
+            </div>
+            <div class="table-container" style="padding: 1.5rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Artículos</th>
+                            <th>Total</th>
+                            <th>Comisión</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employee-sales-history">
+                        <!-- Dynamic Employee Sales -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
