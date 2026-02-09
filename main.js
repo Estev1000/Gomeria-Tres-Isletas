@@ -91,8 +91,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (viewName === 'Inventario') {
             inventoryView.style.display = 'block';
             renderInventory();
-        } else if (viewName === 'Nuevo Ingreso' || viewName === 'Nueva Venta') {
+        } else if (viewName.startsWith('Venta ') || viewName === 'Nueva Venta' || viewName === 'Ventas') {
             saleView.style.display = 'grid'; // Note: grid for pos layout
+
+            // Validate title exists before setting
+            const manualTitle = document.getElementById('manual-entry-title');
+            if (manualTitle) {
+                // Keep the icon but change the text
+                manualTitle.innerHTML = `<i class='bx bx-edit'></i> ${viewName === 'Ventas' || viewName === 'Nueva Venta' ? 'Venta normal' : viewName}`;
+            }
+
             renderPOSProducts();
             refreshCartUI();
         } else if (viewName === 'Reportes') {
@@ -107,9 +115,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Update Sidebar Active state
+        // Update Sidebar Active state
         navLinks.forEach(li => {
-            const text = li.querySelector('span').textContent;
-            if (text === viewName || (viewName === 'Dashboard' && text === 'Panel')) {
+            const span = li.querySelector('span');
+            if (!span) return;
+            const text = span.textContent;
+
+            // Check for match
+            let isActive = text === viewName;
+
+            // Dashboard Alias
+            if (viewName === 'Dashboard' && text === 'Panel') isActive = true;
+
+            // Ventas Parent Active State
+            if (text === 'Ventas' && (viewName.startsWith('Venta ') || viewName === 'Nueva Venta')) {
+                isActive = true;
+                li.classList.add('open'); // Keep menu open
+            }
+
+            if (isActive) {
                 li.classList.add('active');
             } else {
                 li.classList.remove('active');
@@ -379,7 +403,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    navLinks.forEach(li => {
+    // Updated Navigation Event Listeners
+    // Handle Top Level Links (excluding Ventas which is handled separately via HTML/Toggle)
+    const topLevelLinks = document.querySelectorAll('.nav-links > li:not(.has-submenu)');
+    topLevelLinks.forEach(li => {
         li.addEventListener('click', (e) => {
             e.preventDefault();
             const viewName = li.querySelector('span').textContent;
@@ -387,8 +414,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Handle Submenu Toggle
+    const ventasMenu = document.getElementById('ventas-menu-item');
+    if (ventasMenu) {
+        const toggle = ventasMenu.querySelector('.submenu-toggle');
+        toggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            ventasMenu.classList.toggle('open');
+        });
+
+        const subItems = ventasMenu.querySelectorAll('.dropdown-menu a');
+        subItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const view = item.dataset.view;
+                if (view) switchView(view);
+            });
+        });
+    }
+
     document.getElementById('go-to-inventory').addEventListener('click', () => switchView('Inventario'));
-    document.getElementById('quick-sale-btn').addEventListener('click', () => switchView('Nuevo Ingreso'));
+    document.getElementById('quick-sale-btn').addEventListener('click', () => switchView('Venta normal'));
 
     // --- Inventory CRUD ---
     function renderInventory(filterText = '', filterCat = 'all') {
@@ -437,6 +483,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     invSearch.addEventListener('input', applyInventoryFilters);
     invFilter.addEventListener('change', applyInventoryFilters);
+
+    // Dashboard Search Logic
+    const dashboardSearch = document.getElementById('dashboard-search');
+
+    let dashboardSearchDebounceId = null;
+
+    function performDashboardSearch({ clearDashboardInput = true } = {}) {
+        if (!dashboardSearch) return;
+        const term = dashboardSearch.value.trim();
+        if (!term) return;
+
+        switchView('Inventario');
+        if (invSearch) {
+            invSearch.value = term;
+            invSearch.dispatchEvent(new Event('input'));
+            setTimeout(() => invSearch.focus(), 100); // Focus so user can keep typing
+        }
+
+        if (clearDashboardInput) {
+            dashboardSearch.value = '';
+        }
+    }
+
+    if (dashboardSearch) {
+        dashboardSearch.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performDashboardSearch();
+            }
+        });
+
+        // Búsqueda en vivo: al tipear, se va a Inventario y filtra la tabla
+        dashboardSearch.addEventListener('input', () => {
+            clearTimeout(dashboardSearchDebounceId);
+            dashboardSearchDebounceId = setTimeout(() => {
+                performDashboardSearch({ clearDashboardInput: false });
+            }, 250);
+        });
+
+        // También permitir click en el icono del dashboard (el relativo al input)
+        const icon = dashboardSearch.parentElement.querySelector('i');
+        if (icon) {
+            icon.style.cursor = 'pointer';
+            icon.addEventListener('click', () => performDashboardSearch());
+        }
+    }
 
     function openModal(editing = false, data = null) {
         productModal.style.display = 'flex';
@@ -615,19 +707,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addToCart(product) {
-        if (product.stock <= 0) {
+        if (product.stock <= 0 && !product.isManual) {
             showToast('Sin stock disponible', 'error');
             return;
         }
 
         const existing = cart.find(item => item.id === product.id);
         if (existing) {
-            if (existing.qty < product.stock) {
+            if (existing.qty < product.stock || product.isManual) {
                 existing.qty++;
             } else {
                 showToast('Límite de stock alcanzado');
             }
         } else {
+            // For manual items, we clone specifically to avoid reference issues if added again? 
+            // Actually manual items have unique IDs if generated each time, but if re-added from history or similar logic (not present here), be careful.
+            // Since we generate 'manual-' + Date.now(), each click is unique unless we click fast.
+            // Wait, if I type same manual item twice, I generate two different IDs.
+            // That's fine, they will appear as separate lines. That's actually better for "Repair A" + "Repair B".
+            // But if user wants quantity > 1 of manual item? He has to set it in cart.
             cart.push({ ...product, qty: 1 });
         }
         refreshCartUI();
@@ -665,6 +763,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = cart.find(i => i.id === id);
         if (!item) return;
 
+        // Skip stock check for manual items
+        if (item.isManual) {
+            item.qty += delta;
+            if (item.qty <= 0) {
+                cart = cart.filter(i => i.id !== id);
+            }
+            refreshCartUI();
+            return;
+        }
+
         const original = inventory.find(p => p.id === id);
 
         item.qty += delta;
@@ -676,6 +784,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         refreshCartUI();
     };
+
+    // Manual Items
+    document.getElementById('add-manual-btn').addEventListener('click', () => {
+        const descInput = document.getElementById('manual-desc');
+        const priceInput = document.getElementById('manual-price');
+
+        const desc = descInput.value.trim();
+        const price = parseFloat(priceInput.value);
+
+        if (!desc || isNaN(price) || price <= 0) {
+            showToast('Ingresa descripción y precio válido', 'error');
+            return;
+        }
+
+        const manualItem = {
+            id: 'manual-' + Date.now(),
+            name: desc,
+            price: price,
+            qty: 1,
+            stock: 999999, // Infinite stock for manual items
+            isManual: true
+        };
+
+        addToCart(manualItem);
+
+        // Clear inputs
+        descInput.value = '';
+        priceInput.value = '';
+        descInput.focus();
+    });
 
     document.getElementById('pos-search').addEventListener('input', (e) => {
         renderPOSProducts(e.target.value);
@@ -735,8 +873,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update Stock
         cart.forEach(cartItem => {
-            const invProduct = inventory.find(p => p.id === cartItem.id);
-            if (invProduct) invProduct.stock -= cartItem.qty;
+            if (!cartItem.isManual) {
+                const invProduct = inventory.find(p => p.id === cartItem.id);
+                if (invProduct) invProduct.stock -= cartItem.qty;
+            }
         });
 
         // Store for printing
@@ -1255,9 +1395,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Close sidebar when clicking a nav link (mobile)
     navLinks.forEach(li => {
-        li.addEventListener('click', () => {
-            if (window.innerWidth <= 1024) toggleSidebar(false);
-        });
+        // Only close if it's not a submenu parent
+        if (!li.classList.contains('has-submenu')) {
+            li.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) toggleSidebar(false);
+            });
+        } else {
+            // For submenu parents, only close if a child link is clicked
+            const childLinks = li.querySelectorAll('.dropdown-menu a');
+            childLinks.forEach(child => {
+                child.addEventListener('click', () => {
+                    if (window.innerWidth <= 1024) toggleSidebar(false);
+                });
+            });
+        }
     });
 
     // Init

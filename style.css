@@ -16,11 +16,25 @@
     --warning: #f59e0b;
     --danger: #ef4444;
 
+    /* Custom Input Widths */
+    .half-width {
+        width: 48%;
+    }
+
+    .row-inputs {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
     --sidebar-width: 260px;
     --header-height: 80px;
 
-    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -1210,4 +1224,77 @@ tr:last-child td {
 
 #ticket-print-area {
     display: none;
+}
+
+/* Sidebar Submenu */
+.nav-links li {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-links li.has-submenu>a {
+    justify-content: space-between;
+}
+
+.nav-links li.has-submenu .link-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-links li.has-submenu .bx-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+.nav-links li.has-submenu.open .bx-chevron-down {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    display: none;
+    list-style: none;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-left: 1rem;
+    padding-bottom: 0.5rem;
+    width: 100%;
+}
+
+.nav-links li.open .dropdown-menu {
+    display: flex;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-menu li a {
+    font-size: 0.85rem;
+    padding: 8px 14px;
+    color: var(--text-muted);
+    border-radius: 8px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+}
+
+.dropdown-menu li a:hover,
+.dropdown-menu li.active a {
+    color: var(--primary);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.dropdown-menu li.active a {
+    font-weight: 600;
 }

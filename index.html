@@ -44,11 +44,40 @@
                         <span>Reparaciones</span>
                     </a>
                 </li>
-                <li>
-                    <a href="#">
-                        <i class='bx bxs-cart-add'></i>
-                        <span>Nuevo Ingreso</span>
+                <li class="has-submenu" id="ventas-menu-item">
+                    <a href="#" class="submenu-toggle">
+                        <div class="link-content">
+                            <i class='bx bxs-cart-add'></i>
+                            <span>Ventas</span>
+                        </div>
+                        <i class='bx bx-chevron-down' style="margin-left: auto;"></i>
                     </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="#" data-view="Venta normal">
+                                <i class='bx bx-radio-circle'></i>
+                                <span>Venta normal</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" data-view="Venta fuera de stock">
+                                <i class='bx bx-radio-circle'></i>
+                                <span>Venta fuera de stock</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" data-view="Venta de usados">
+                                <i class='bx bx-radio-circle'></i>
+                                <span>Venta de usados</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" data-view="Venta / Servicio">
+                                <i class='bx bx-radio-circle'></i>
+                                <span>Venta / Servicio</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li>
                     <a href="#">
@@ -444,6 +473,24 @@
                 <div class="content-grid pos-grid">
                     <!-- Product Selection -->
                     <div class="card product-selection">
+                        <!-- Manual Entry Block -->
+                        <div class="manual-add-block"
+                            style="background: var(--bg-body); padding: 1rem; border-radius: 12px; border: 1px dashed var(--border-glass); margin-bottom: 1.5rem;">
+                            <h4 id="manual-entry-title"
+                                style="margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--accent);"><i
+                                    class='bx bx-edit'></i> Ingreso Manual / Fuera de Stock</h4>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <input type="text" id="manual-desc" placeholder="Descripción (ej: Mano de obra extra)"
+                                    style="flex: 2; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main);">
+                                <input type="number" id="manual-price" placeholder="$ Precio"
+                                    style="flex: 1; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main);">
+                                <button id="add-manual-btn" class="secondary-btn" title="Agregar Manual"
+                                    style="padding: 0 1rem;">
+                                    <i class='bx bx-plus'></i>
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="search-box full-width" style="margin-bottom: 1.5rem;">
                             <i class='bx bx-search'></i>
                             <input type="text" id="pos-search" placeholder="Escribe nombre o código del repuesto...">
