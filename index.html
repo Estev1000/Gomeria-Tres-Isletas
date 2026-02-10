@@ -44,6 +44,12 @@
                         <span>Reparaciones</span>
                     </a>
                 </li>
+                <li>
+                    <a href="#">
+                        <i class='bx bx-calendar'></i>
+                        <span>Turnos</span>
+                    </a>
+                </li>
                 <li class="has-submenu" id="ventas-menu-item">
                     <a href="#" class="submenu-toggle">
                         <div class="link-content">
@@ -279,6 +285,190 @@
                     <div id="repair-list" class="repairs-list">
                         <!-- Dynamic repair items will be inserted here -->
                     </div>
+                </div>
+            </section>
+
+            <section id="turnos-view" style="display: none;">
+                <header>
+                    <div class="mobile-menu-toggle" id="menu-open-turnos">
+                        <i class='bx bx-menu'></i>
+                    </div>
+                    <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <div>
+                            <h1>Turnos</h1>
+                            <p>Agenda y seguimiento de turnos realizados.</p>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="primary-btn" id="new-turno-btn"><i class='bx bx-plus'></i> Nuevo Turno</button>
+                    </div>
+                </header>
+
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <div class="card-header" style="display:flex; align-items:center; justify-content:space-between; gap: 1rem; flex-wrap:wrap;">
+                        <h3>Calendario</h3>
+                        <div style="display:flex; align-items:center; gap: 10px;">
+                            <label for="turnos-date" style="color: var(--text-muted); font-size: 0.9rem;">Día</label>
+                            <input type="date" id="turnos-date"
+                                style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main);">
+                        </div>
+                    </div>
+                    <div id="turnos-day-summary" style="padding: 0 1.5rem 1.5rem; color: var(--text-muted);"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Turnos del Día</h3>
+                    </div>
+                    <div id="turnos-list" class="repairs-list"></div>
+                </div>
+            </section>
+
+            <section id="turno-detail-view" style="display: none;">
+                <header>
+                    <div class="mobile-menu-toggle" id="menu-open-turno-detail">
+                        <i class='bx bx-menu'></i>
+                    </div>
+                    <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <div>
+                            <h1>Detalle de Turno</h1>
+                        </div>
+                    </div>
+                    <button class="secondary-btn" onclick="switchTurnoView('Turnos')" style="margin-left: auto;">
+                        <i class='bx bx-arrow-back'></i> Volver
+                    </button>
+                </header>
+
+                <div class="card detail-card" style="max-width: 650px; margin: 2rem auto;">
+                    <div class="detail-header">
+                        <h2 id="turno-detail-title">Turno</h2>
+                        <span id="turno-detail-badge" class="badge">Estado</span>
+                    </div>
+                    <p id="turno-detail-client" class="text-muted">Cliente</p>
+
+                    <div style="margin-top: 1rem; display:grid; gap: 10px;">
+                        <div style="display:flex; gap: 10px; flex-wrap:wrap;">
+                            <div style="flex:1; min-width: 200px;">
+                                <label style="color: var(--text-muted); font-size: 0.9rem;">Fecha</label>
+                                <input type="date" id="turno-detail-date"
+                                    style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main);">
+                            </div>
+                            <div style="flex:1; min-width: 200px;">
+                                <label style="color: var(--text-muted); font-size: 0.9rem;">Hora</label>
+                                <input type="time" id="turno-detail-time"
+                                    style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main);">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="color: var(--text-muted); font-size: 0.9rem;">Trabajo / Servicio</label>
+                            <input type="text" id="turno-detail-service"
+                                style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main);">
+                        </div>
+
+                        <div>
+                            <label style="color: var(--text-muted); font-size: 0.9rem;">Notas</label>
+                            <textarea id="turno-detail-notes" rows="3"
+                                style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main);"></textarea>
+                        </div>
+
+                        <button onclick="saveTurnoDetail()" class="primary-btn" style="width: 100%; height: auto; padding: 12px;">
+                            <i class='bx bx-save'></i> Guardar Cambios
+                        </button>
+                    </div>
+
+                    <div class="share-section" style="border-top: 1px solid var(--border-glass); padding-top: 1.5rem; margin-top: 1.5rem;">
+                        <p style="margin-bottom: 1rem;">Opciones para el Cliente:</p>
+                        <div class="link-box" style="display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap:wrap;">
+                            <input type="text" id="turno-share-link" readonly
+                                style="flex: 1; min-width: 220px; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-muted); font-size: 0.8rem;">
+                            <button onclick="copyTurnoLink()" class="secondary-btn" title="Copiar Link" style="width: auto;">
+                                <i class='bx bx-copy'></i> Copiar
+                            </button>
+                            <button onclick="sendTurnoWhatsApp()"
+                                style="background: #25D366; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                <i class='bx bxl-whatsapp'></i> WhatsApp
+                            </button>
+                        </div>
+                        <button onclick="downloadTurnoStatusImage()" class="primary-btn" style="width: 100%; margin-bottom: 1rem;">
+                            <i class='bx bx-image'></i> DESCARGAR FOTO PARA WHATSAPP
+                        </button>
+                    </div>
+
+                    <button onclick="deleteTurnoRecord()" class="action-btn delete" style="width: 100%; margin-top: 1rem; padding: 12px; height: auto;">
+                        <i class='bx bx-trash'></i> ELIMINAR REGISTRO
+                    </button>
+                </div>
+            </section>
+
+            <section id="new-turno-view" style="display: none;">
+                <header>
+                    <div class="mobile-menu-toggle" id="menu-open-new-turno">
+                        <i class='bx bx-menu'></i>
+                    </div>
+                    <div class="header-title" style="display: flex; align-items: center; gap: 15px;">
+                        <img src="logo.png"
+                            style="height: 50px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));">
+                        <div>
+                            <h1>Nuevo Turno</h1>
+                            <p>Registra un turno y su día de realización.</p>
+                        </div>
+                    </div>
+                    <button class="secondary-btn" onclick="switchTurnoView('Turnos')" style="margin-left: auto;">
+                        <i class='bx bx-arrow-back'></i> Volver
+                    </button>
+                </header>
+
+                <div class="card" style="max-width: 650px; margin: 2rem auto;">
+                    <form id="new-turno-form">
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3><i class='bx bx-user'></i> Datos del Cliente</h3>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label>Nombre</label>
+                                <input type="text" id="turnoClientName" required
+                                    style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label>WhatsApp</label>
+                                <input type="tel" id="turnoClientPhone" required
+                                    style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3><i class='bx bx-calendar'></i> Turno</h3>
+                            <div style="display:flex; gap: 10px; flex-wrap:wrap; margin-bottom: 1rem;">
+                                <div style="flex:1; min-width: 200px;" class="form-group">
+                                    <label>Fecha</label>
+                                    <input type="date" id="turnoDate" required
+                                        style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
+                                </div>
+                                <div style="flex:1; min-width: 200px;" class="form-group">
+                                    <label>Hora</label>
+                                    <input type="time" id="turnoTime"
+                                        style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label>Trabajo / Servicio</label>
+                                <input type="text" id="turnoService" required
+                                    style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label>Notas</label>
+                                <textarea id="turnoNotes" rows="3"
+                                    style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main); width: 100%;"></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="primary-btn" style="width: 100%; padding: 12px; height: auto;">
+                            <i class='bx bx-check'></i> Registrar Turno
+                        </button>
+                    </form>
                 </div>
             </section>
 

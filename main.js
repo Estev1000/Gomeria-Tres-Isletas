@@ -24,6 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentRepairId = null;
     const GOMERIA_STORE_KEY = 'gomeria_repairs';
 
+    // --- TURNOS DATA (GOMERIA) ---
+    let turnos = JSON.parse(localStorage.getItem('gomeria_turnos')) || [];
+    let currentTurnoId = null;
+    const GOMERIA_TURNOS_KEY = 'gomeria_turnos';
+
     let config = JSON.parse(localStorage.getItem('repuestospos_config')) || {
         storeName: 'Gomeria Tres Isletas',
         storeSlogan: 'Gestión Inteligente',
@@ -41,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('repuestospos_employees', JSON.stringify(employees));
         localStorage.setItem('repuestospos_config', JSON.stringify(config));
         localStorage.setItem(GOMERIA_STORE_KEY, JSON.stringify(repairs));
+        localStorage.setItem(GOMERIA_TURNOS_KEY, JSON.stringify(turnos));
         updateStats();
         applyBranding();
     }
@@ -50,6 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const repairsView = document.getElementById('repairs-view');
     const repairDetailView = document.getElementById('repair-detail-view');
     const newRepairView = document.getElementById('new-repair-view');
+    const turnosView = document.getElementById('turnos-view');
+    const turnoDetailView = document.getElementById('turno-detail-view');
+    const newTurnoView = document.getElementById('new-turno-view');
     const clientView = document.getElementById('client-view');
     const inventoryView = document.getElementById('inventory-view');
     const saleView = document.getElementById('sale-view');
@@ -82,6 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
         repairsView.style.display = 'none';
         repairDetailView.style.display = 'none';
         newRepairView.style.display = 'none';
+        if (turnosView) turnosView.style.display = 'none';
+        if (turnoDetailView) turnoDetailView.style.display = 'none';
+        if (newTurnoView) newTurnoView.style.display = 'none';
         clientView.style.display = 'none';
         inventoryView.style.display = 'none';
         saleView.style.display = 'none';
@@ -96,6 +108,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (viewName === 'Reparaciones') {
             repairsView.style.display = 'block';
             renderRepairs();
+        } else if (viewName === 'Turnos') {
+            if (turnosView) turnosView.style.display = 'block';
+            initTurnosView();
         } else if (viewName === 'Inventario') {
             inventoryView.style.display = 'block';
             renderInventory();
@@ -168,6 +183,25 @@ document.addEventListener('DOMContentLoaded', () => {
             repairsView.style.display = 'none';
             repairDetailView.style.display = 'none';
             newRepairView.style.display = 'block';
+        }
+    }
+
+    function switchTurnoView(viewName) {
+        if (!turnosView || !turnoDetailView || !newTurnoView) return;
+
+        if (viewName === 'Turnos') {
+            turnoDetailView.style.display = 'none';
+            newTurnoView.style.display = 'none';
+            turnosView.style.display = 'block';
+            initTurnosView();
+        } else if (viewName === 'Detail') {
+            turnosView.style.display = 'none';
+            newTurnoView.style.display = 'none';
+            turnoDetailView.style.display = 'block';
+        } else if (viewName === 'NewTurno') {
+            turnosView.style.display = 'none';
+            turnoDetailView.style.display = 'none';
+            newTurnoView.style.display = 'block';
         }
     }
 
@@ -258,6 +292,234 @@ document.addEventListener('DOMContentLoaded', () => {
         return btoa(encodeURI(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
             return String.fromCharCode('0x' + p1);
         }));
+    }
+
+    function getTodayDateISO() {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function formatTurnoDateLabel(isoDate) {
+        if (!isoDate) return '';
+        const parts = isoDate.split('-');
+        if (parts.length !== 3) return isoDate;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    // --- TURNOS FUNCTIONS ---
+    function initTurnosView() {
+        const dateInput = document.getElementById('turnos-date');
+        if (dateInput && !dateInput.value) dateInput.value = getTodayDateISO();
+        renderTurnos();
+    }
+
+    function renderTurnos() {
+        const listEl = document.getElementById('turnos-list');
+        const summaryEl = document.getElementById('turnos-day-summary');
+        const dateInput = document.getElementById('turnos-date');
+        if (!listEl || !dateInput) return;
+
+        const day = dateInput.value || getTodayDateISO();
+        const dayTurnos = turnos.filter(t => (t.date || '') === day);
+
+        if (summaryEl) {
+            const count = dayTurnos.length;
+            summaryEl.textContent = `${formatTurnoDateLabel(day)} - ${count} turno${count === 1 ? '' : 's'}`;
+        }
+
+        listEl.innerHTML = '';
+
+        if (dayTurnos.length === 0) {
+            listEl.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding:2rem;">No hay turnos para este día.</p>';
+            return;
+        }
+
+        const ordered = [...dayTurnos].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+        ordered.forEach(t => {
+            const div = document.createElement('div');
+            div.className = 'repair-item';
+            div.onclick = () => loadTurnoDetail(t.id);
+            const timeLabel = t.time ? ` - ${t.time}` : '';
+            div.innerHTML = `
+                <div class="repair-info">
+                    <h3>${t.service || 'TURNO'}</h3>
+                    <p>${t.clientName || ''}${timeLabel}</p>
+                </div>
+                <span class="status-badge ready">REALIZADO</span>
+            `;
+            listEl.appendChild(div);
+        });
+    }
+
+    function loadTurnoDetail(id) {
+        currentTurnoId = id;
+        const t = turnos.find(item => item.id === id);
+        if (!t) return;
+
+        const titleEl = document.getElementById('turno-detail-title');
+        const badgeEl = document.getElementById('turno-detail-badge');
+        const clientEl = document.getElementById('turno-detail-client');
+
+        if (titleEl) titleEl.textContent = t.service || 'Turno';
+        if (badgeEl) {
+            badgeEl.textContent = 'REALIZADO';
+            badgeEl.className = 'status-badge ready';
+        }
+        if (clientEl) clientEl.textContent = `${t.clientName || ''} ${t.clientPhone ? '- ' + t.clientPhone : ''}`;
+
+        const dateEl = document.getElementById('turno-detail-date');
+        const timeEl = document.getElementById('turno-detail-time');
+        const serviceEl = document.getElementById('turno-detail-service');
+        const notesEl = document.getElementById('turno-detail-notes');
+
+        if (dateEl) dateEl.value = t.date || '';
+        if (timeEl) timeEl.value = t.time || '';
+        if (serviceEl) serviceEl.value = t.service || '';
+        if (notesEl) notesEl.value = t.notes || '';
+
+        updateTurnoShareLink(t);
+        switchTurnoView('Detail');
+    }
+
+    function saveTurnoDetail() {
+        if (!currentTurnoId) return;
+        const idx = turnos.findIndex(t => t.id === currentTurnoId);
+        if (idx === -1) return;
+
+        const dateEl = document.getElementById('turno-detail-date');
+        const timeEl = document.getElementById('turno-detail-time');
+        const serviceEl = document.getElementById('turno-detail-service');
+        const notesEl = document.getElementById('turno-detail-notes');
+
+        turnos[idx].date = dateEl ? dateEl.value : turnos[idx].date;
+        turnos[idx].time = timeEl ? timeEl.value : turnos[idx].time;
+        turnos[idx].service = serviceEl ? serviceEl.value.trim() : turnos[idx].service;
+        turnos[idx].notes = notesEl ? notesEl.value.trim() : turnos[idx].notes;
+
+        saveData();
+        updateTurnoShareLink(turnos[idx]);
+        showToast('Turno actualizado');
+    }
+
+    function updateTurnoShareLink(turno) {
+        const link = window.location.href.split('#')[0] + '#t=' + safeEncode({ ...turno, kind: 'turno' });
+        const input = document.getElementById('turno-share-link');
+        if (input) input.value = link;
+    }
+
+    function copyTurnoLink() {
+        const input = document.getElementById('turno-share-link');
+        if (!input) return;
+        const linkText = input.value;
+
+        navigator.clipboard.writeText(linkText).then(() => {
+            showToast('Enlace copiado');
+        }).catch(err => {
+            const textArea = document.createElement("textarea");
+            textArea.value = linkText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showToast('Enlace copiado');
+        });
+    }
+
+    function sendTurnoWhatsApp() {
+        const input = document.getElementById('turno-share-link');
+        const link = input ? input.value : '';
+        const t = turnos.find(i => i.id === currentTurnoId);
+        if (t && t.clientPhone) {
+            let phone = t.clientPhone.replace(/[^0-9]/g, '');
+            if (phone.length === 10) {
+                phone = '549' + phone;
+            } else if (phone.length === 11 && phone.startsWith('0')) {
+                phone = '549' + phone.substring(1);
+            }
+
+            const fecha = t.date ? formatTurnoDateLabel(t.date) : '';
+            const hora = t.time ? ` ${t.time}` : '';
+            const msg = `Hola ${t.clientName || ''}, tu turno de ${t.service || 'servicio'} fue realizado el ${fecha}${hora}. Detalle: ${link}`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        } else {
+            showToast('Número de teléfono no disponible', 'error');
+        }
+    }
+
+    function downloadTurnoStatusImage() {
+        const t = turnos.find(i => i.id === currentTurnoId);
+        if (!t) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 1000;
+        canvas.height = 1000;
+        const ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, 1000, 1000);
+
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 40;
+        ctx.strokeRect(50, 50, 900, 900);
+
+        ctx.fillStyle = '#06b6d4';
+        ctx.font = 'bold 40px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('GOMERIA / LUBRICENTRO', 500, 110);
+        ctx.fillText('TRES ISLETAS', 500, 155);
+
+        ctx.font = 'bold 35px Arial';
+        ctx.fillText('COMPROBANTE DE TURNO', 500, 210);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '30px Arial';
+        ctx.fillText(`TURNO #${(t.id || '').slice(-6)}`, 500, 255);
+
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(150, 300); ctx.lineTo(850, 300); ctx.stroke();
+
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 70px Arial';
+        ctx.fillText((t.service || 'TURNO').toUpperCase(), 500, 410);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '38px Arial';
+        ctx.fillText(`CLIENTE: ${(t.clientName || '').toUpperCase()}`, 500, 470);
+
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(150, 560, 700, 190);
+
+        ctx.fillStyle = '#4ade80';
+        ctx.font = 'bold 65px Arial';
+        ctx.fillText('REALIZADO', 500, 650);
+
+        const fecha = t.date ? formatTurnoDateLabel(t.date) : '-';
+        const hora = t.time ? t.time : '-';
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 45px Arial';
+        ctx.fillText(`${fecha}  ${hora}`, 500, 835);
+
+        ctx.fillStyle = '#475569';
+        ctx.font = '25px Arial';
+        ctx.fillText('Gomeria / Lubricentro Tres Isletas', 500, 920);
+
+        const dlink = document.createElement('a');
+        dlink.download = `TURNO_${(t.id || '').slice(-6)}.png`;
+        dlink.href = canvas.toDataURL('image/png');
+        dlink.click();
+    }
+
+    function deleteTurnoRecord() {
+        if (!currentTurnoId) return;
+        if (confirm('¿Eliminar este turno?')) {
+            turnos = turnos.filter(i => i.id !== currentTurnoId);
+            saveData();
+            switchTurnoView('Turnos');
+        }
     }
 
     function copyRepairLink() {
@@ -406,6 +668,51 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('new-repair-btn').onclick = () => switchRepairView('NewRepair');
+
+    const newTurnoBtn = document.getElementById('new-turno-btn');
+    if (newTurnoBtn) newTurnoBtn.onclick = () => switchTurnoView('NewTurno');
+
+    const turnosDateInput = document.getElementById('turnos-date');
+    if (turnosDateInput) {
+        turnosDateInput.addEventListener('change', () => renderTurnos());
+    }
+
+    const newTurnoForm = document.getElementById('new-turno-form');
+    if (newTurnoForm) {
+        newTurnoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('turnoClientName').value.trim();
+            const phone = document.getElementById('turnoClientPhone').value.trim();
+            const date = document.getElementById('turnoDate').value;
+            const time = document.getElementById('turnoTime').value;
+            const service = document.getElementById('turnoService').value.trim();
+            const notes = document.getElementById('turnoNotes').value.trim();
+
+            if (!name || !service || !date) {
+                showToast('Completa nombre, servicio y fecha', 'error');
+                return;
+            }
+
+            const newTurno = {
+                id: Date.now().toString(),
+                clientName: name,
+                clientPhone: phone,
+                date,
+                time: time || '',
+                service,
+                notes: notes || ''
+            };
+
+            turnos.unshift(newTurno);
+            saveData();
+
+            newTurnoForm.reset();
+            const d = document.getElementById('turnos-date');
+            if (d) d.value = date;
+            switchTurnoView('Turnos');
+        });
+    }
 
     // Search functionality for repairs
     const repairsSearchInput = document.getElementById('repairs-search');
@@ -1409,6 +1716,8 @@ document.addEventListener('DOMContentLoaded', () => {
             inventory: inventory,
             sales: sales,
             clients: clients,
+            repairs: repairs,
+            turnos: turnos,
             employees: employees,
             exportDate: new Date().toISOString()
         };
@@ -1435,6 +1744,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const employeesSheet = XLSX.utils.json_to_sheet(employees);
         XLSX.utils.book_append_sheet(workbook, employeesSheet, "Empleados");
 
+        // Sheet 5: Repairs
+        const repairsSheet = XLSX.utils.json_to_sheet(repairs);
+        XLSX.utils.book_append_sheet(workbook, repairsSheet, "Reparaciones");
+
+        // Sheet 6: Turnos
+        const turnosSheet = XLSX.utils.json_to_sheet(turnos);
+        XLSX.utils.book_append_sheet(workbook, turnosSheet, "Turnos");
+
         XLSX.writeFile(workbook, `RepuestosPOS_Backup_${new Date().toISOString().split('T')[0]}.xlsx`);
         showToast('Backup Excel generado');
     };
@@ -1459,7 +1776,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         inventory: XLSX.utils.sheet_to_json(workbook.Sheets["Inventario"]),
                         sales: XLSX.utils.sheet_to_json(workbook.Sheets["Ventas"]),
                         clients: XLSX.utils.sheet_to_json(workbook.Sheets["Clientes"]),
-                        employees: workbook.Sheets["Empleados"] ? XLSX.utils.sheet_to_json(workbook.Sheets["Empleados"]) : []
+                        employees: workbook.Sheets["Empleados"] ? XLSX.utils.sheet_to_json(workbook.Sheets["Empleados"]) : [],
+                        repairs: workbook.Sheets["Reparaciones"] ? XLSX.utils.sheet_to_json(workbook.Sheets["Reparaciones"]) : [],
+                        turnos: workbook.Sheets["Turnos"] ? XLSX.utils.sheet_to_json(workbook.Sheets["Turnos"]) : []
                     };
                 } else {
                     importedData = JSON.parse(event.target.result);
@@ -1471,6 +1790,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         sales = importedData.sales;
                         clients = importedData.clients;
                         employees = importedData.employees || [];
+                        repairs = importedData.repairs || [];
+                        turnos = importedData.turnos || [];
                         saveData();
                         showToast('Datos cargados con éxito');
                         location.reload();
@@ -1522,11 +1843,44 @@ document.addEventListener('DOMContentLoaded', () => {
         repairsView.style.display = 'none';
         repairDetailView.style.display = 'none';
         newRepairView.style.display = 'none';
+        if (turnosView) turnosView.style.display = 'none';
+        if (turnoDetailView) turnoDetailView.style.display = 'none';
+        if (newTurnoView) newTurnoView.style.display = 'none';
         inventoryView.style.display = 'none';
         saleView.style.display = 'none';
         reportsView.style.display = 'none';
         clientsView.style.display = 'none';
         settingsView.style.display = 'none';
+
+        const isTurno = data && (data.kind === 'turno' || data.service !== undefined);
+
+        if (isTurno) {
+            document.getElementById('client-order-id').textContent = `TURNO #${(data.id || "").slice(-6)}`;
+            document.getElementById('client-device-model').textContent = data.service || "TURNO";
+            document.getElementById('client-name-display').textContent = `CLIENTE: ${data.clientName || ""}`;
+            document.getElementById('client-cost').textContent = data.date ? `${formatTurnoDateLabel(data.date)}${data.time ? ' ' + data.time : ''}` : "";
+
+            const container = document.getElementById('client-progress');
+            if (container) {
+                const fecha = data.date ? formatTurnoDateLabel(data.date) : '-';
+                const hora = data.time ? data.time : '-';
+                const notas = data.notes ? data.notes : '-';
+
+                container.innerHTML = '';
+                const items = [
+                    { l: `FECHA: ${fecha}` },
+                    { l: `HORA: ${hora}` },
+                    { l: `NOTAS: ${notas}` }
+                ];
+                items.forEach((it) => {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'margin-bottom:1.25rem; display:flex; align-items:center; gap:15px;';
+                    div.innerHTML = `<i class='bx bxs-check-circle' style="color:var(--accent); font-size:1.8rem;"></i> <span style="font-weight:bold; font-size:1.05rem;">${it.l}</span>`;
+                    container.appendChild(div);
+                });
+            }
+            return;
+        }
 
         document.getElementById('client-order-id').textContent = `ORDEN #${(data.id || "").slice(-6)}`;
         document.getElementById('client-device-model').textContent = data.deviceModel || "EQUIPO";
@@ -1564,6 +1918,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hash = window.location.hash;
     let dataParam = null;
     if (hash.includes('v=')) dataParam = hash.split('v=')[1];
+    if (hash.includes('t=')) dataParam = hash.split('t=')[1];
 
     if (dataParam) {
         try {
@@ -1586,6 +1941,15 @@ document.addEventListener('DOMContentLoaded', () => {
     window.downloadRepairStatusImage = downloadRepairStatusImage;
     window.deleteRepairRecord = deleteRepairRecord;
     window.getRepairStatusLabel = getRepairStatusLabel;
+
+    window.switchTurnoView = switchTurnoView;
+    window.renderTurnos = renderTurnos;
+    window.loadTurnoDetail = loadTurnoDetail;
+    window.saveTurnoDetail = saveTurnoDetail;
+    window.copyTurnoLink = copyTurnoLink;
+    window.sendTurnoWhatsApp = sendTurnoWhatsApp;
+    window.downloadTurnoStatusImage = downloadTurnoStatusImage;
+    window.deleteTurnoRecord = deleteTurnoRecord;
 
     // Expose inventory and client functions to global scope
     window.switchView = switchView;
@@ -1654,6 +2018,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('menu-open-repairs'),
         document.getElementById('menu-open-repair-detail'),
         document.getElementById('menu-open-new-repair'),
+        document.getElementById('menu-open-turnos'),
+        document.getElementById('menu-open-turno-detail'),
+        document.getElementById('menu-open-new-turno'),
         document.getElementById('menu-open-employees'),
         document.getElementById('menu-open-inv'),
         document.getElementById('menu-open-sale'),
