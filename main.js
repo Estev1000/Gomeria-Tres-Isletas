@@ -755,6 +755,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('go-to-inventory').addEventListener('click', () => switchView('Inventario'));
     document.getElementById('quick-sale-btn').addEventListener('click', () => switchView('Venta normal'));
 
+    // Notification Bells Navigation
+    const bStock = document.getElementById('bell-stock');
+    if (bStock) bStock.onclick = () => switchView('Inventario');
+    const bRepairs = document.getElementById('bell-repairs');
+    if (bRepairs) bRepairs.onclick = () => switchView('Reparaciones');
+    const bTurnos = document.getElementById('bell-turnos');
+    if (bTurnos) bTurnos.onclick = () => switchView('Turnos');
+
     // --- Inventory CRUD ---
     function renderInventory(filterText = '', filterCat = 'all') {
         inventoryTableBody.innerHTML = '';
@@ -1493,10 +1501,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Dashboard logic ---
     function updateStats() {
+        const lowStockCount = inventory.filter(p => p.stock <= 5).length;
         document.getElementById('stat-total-products').textContent = inventory.length;
-        document.getElementById('stat-low-stock').textContent = inventory.filter(p => p.stock <= 5).length;
+        document.getElementById('stat-low-stock').textContent = lowStockCount;
+
+        // --- Update Notification Badges ---
+        const badgeStock = document.getElementById('badge-stock');
+        if (badgeStock) badgeStock.textContent = lowStockCount;
+
+        const pendingRepairs = repairs.filter(r => r.status === 'pending').length;
+        const badgeRepairs = document.getElementById('badge-repairs');
+        if (badgeRepairs) badgeRepairs.textContent = pendingRepairs;
 
         const today = new Date().toISOString().split('T')[0];
+        const todayTurnos = turnos.filter(t => t.date === today).length;
+        const badgeTurnos = document.getElementById('badge-turnos');
+        if (badgeTurnos) badgeTurnos.textContent = todayTurnos;
+
         const todaySales = sales.filter(s => s && s.date && s.date.startsWith(today));
         const totalSalesVal = todaySales.reduce((acc, s) => acc + (s.total || 0), 0);
 

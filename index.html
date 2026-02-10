@@ -153,7 +153,15 @@
                         <input type="text" id="dashboard-search" placeholder="Buscar repuesto, código o marca...">
                     </div>
                     <div class="header-actions">
-                        <button class="icon-btn"><i class='bx bxs-bell'></i><span class="badge">3</span></button>
+                        <button class="icon-btn" id="bell-stock" title="Stock Crítico"><i class='bx bxs-bell'
+                                style="color: var(--warning);"></i><span class="badge" id="badge-stock"
+                                style="background: var(--warning);">0</span></button>
+                        <button class="icon-btn" id="bell-repairs" title="Reparaciones Pendientes"><i
+                                class='bx bxs-bell' style="color: var(--primary);"></i><span class="badge"
+                                id="badge-repairs" style="background: var(--primary);">0</span></button>
+                        <button class="icon-btn" id="bell-turnos" title="Turnos de Hoy"><i class='bx bxs-bell'
+                                style="color: var(--success);"></i><span class="badge" id="badge-turnos"
+                                style="background: var(--success);">0</span></button>
                         <button class="primary-btn" id="quick-sale-btn"><i class='bx bx-plus'></i> Venta Rápida</button>
                     </div>
                 </header>
@@ -307,7 +315,8 @@
                 </header>
 
                 <div class="card" style="margin-bottom: 1.5rem;">
-                    <div class="card-header" style="display:flex; align-items:center; justify-content:space-between; gap: 1rem; flex-wrap:wrap;">
+                    <div class="card-header"
+                        style="display:flex; align-items:center; justify-content:space-between; gap: 1rem; flex-wrap:wrap;">
                         <h3>Calendario</h3>
                         <div style="display:flex; align-items:center; gap: 10px;">
                             <label for="turnos-date" style="color: var(--text-muted); font-size: 0.9rem;">Día</label>
@@ -376,17 +385,20 @@
                                 style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-main);"></textarea>
                         </div>
 
-                        <button onclick="saveTurnoDetail()" class="primary-btn" style="width: 100%; height: auto; padding: 12px;">
+                        <button onclick="saveTurnoDetail()" class="primary-btn"
+                            style="width: 100%; height: auto; padding: 12px;">
                             <i class='bx bx-save'></i> Guardar Cambios
                         </button>
                     </div>
 
-                    <div class="share-section" style="border-top: 1px solid var(--border-glass); padding-top: 1.5rem; margin-top: 1.5rem;">
+                    <div class="share-section"
+                        style="border-top: 1px solid var(--border-glass); padding-top: 1.5rem; margin-top: 1.5rem;">
                         <p style="margin-bottom: 1rem;">Opciones para el Cliente:</p>
                         <div class="link-box" style="display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap:wrap;">
                             <input type="text" id="turno-share-link" readonly
                                 style="flex: 1; min-width: 220px; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-muted); font-size: 0.8rem;">
-                            <button onclick="copyTurnoLink()" class="secondary-btn" title="Copiar Link" style="width: auto;">
+                            <button onclick="copyTurnoLink()" class="secondary-btn" title="Copiar Link"
+                                style="width: auto;">
                                 <i class='bx bx-copy'></i> Copiar
                             </button>
                             <button onclick="sendTurnoWhatsApp()"
@@ -394,12 +406,14 @@
                                 <i class='bx bxl-whatsapp'></i> WhatsApp
                             </button>
                         </div>
-                        <button onclick="downloadTurnoStatusImage()" class="primary-btn" style="width: 100%; margin-bottom: 1rem;">
+                        <button onclick="downloadTurnoStatusImage()" class="primary-btn"
+                            style="width: 100%; margin-bottom: 1rem;">
                             <i class='bx bx-image'></i> DESCARGAR FOTO PARA WHATSAPP
                         </button>
                     </div>
 
-                    <button onclick="deleteTurnoRecord()" class="action-btn delete" style="width: 100%; margin-top: 1rem; padding: 12px; height: auto;">
+                    <button onclick="deleteTurnoRecord()" class="action-btn delete"
+                        style="width: 100%; margin-top: 1rem; padding: 12px; height: auto;">
                         <i class='bx bx-trash'></i> ELIMINAR REGISTRO
                     </button>
                 </div>
