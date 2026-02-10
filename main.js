@@ -1278,6 +1278,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="action-btn print-past-sale" data-id="${s.id}" title="Reimprimir Ticket">
                         <i class='bx bx-printer'></i>
                     </button>
+                    <button class="action-btn delete delete-sale" data-id="${s.id}" title="Eliminar Venta">
+                        <i class='bx bx-trash'></i>
+                    </button>
                 </td>
             `;
             table.appendChild(tr);
@@ -1320,7 +1323,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rows.sort((a, b) => b.total - a.total);
 
             if (rows.length === 0) {
-                summaryBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem;">Sin ventas</td></tr>';
+                summaryBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem;">Sin ventas</td></tr>';
             } else {
                 rows.forEach(r => {
                     const tr = document.createElement('tr');
@@ -1330,6 +1333,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${r.count || 0}</td>
                         <td>$${Number(r.total || 0).toLocaleString()}</td>
                         <td>$${Number(r.commission || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                        <td>
+                             <button class="action-btn delete clear-employee-sales" data-key="${r.key}" title="Eliminar registro de ventas">
+                                <i class='bx bx-trash'></i>
+                            </button>
+                        </td>
                     `;
                     summaryBody.appendChild(tr);
                 });
@@ -1350,6 +1358,37 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.onclick = (e) => {
                 const sale = sales.find(s => s.id === btn.dataset.id);
                 sendToWhatsApp(sale);
+            };
+        });
+
+        // Delete Sale Handler
+        document.querySelectorAll('.delete-sale').forEach(btn => {
+            btn.onclick = () => {
+                if (confirm('¿Seguro que deseas eliminar esta venta permanentemente?')) {
+                    sales = sales.filter(s => s.id !== btn.dataset.id);
+                    saveData();
+                    updateReports();
+                    showToast('Venta eliminada');
+                }
+            };
+        });
+
+        // Clear Employee Sales Handler
+        document.querySelectorAll('.clear-employee-sales').forEach(btn => {
+            btn.onclick = () => {
+                const key = btn.dataset.key;
+                if (confirm('¿ATENCIÓN: Esto eliminará TODAS las ventas registradas para este empleado. ¿Continuar?')) {
+                    const beforeCount = sales.length;
+                    if (key === '__unassigned__') {
+                        sales = sales.filter(s => s.employeeId);
+                    } else {
+                        sales = sales.filter(s => String(s.employeeId) !== String(key));
+                    }
+                    const deletedCount = beforeCount - sales.length;
+                    saveData();
+                    updateReports();
+                    showToast(`${deletedCount} registros eliminados`);
+                }
             };
         });
     }
