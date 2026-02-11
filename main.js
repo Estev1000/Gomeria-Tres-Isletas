@@ -1831,6 +1831,118 @@ document.addEventListener('DOMContentLoaded', () => {
         importInput.value = '';
     };
 
+    // --- Daily Report Logic ---
+    function openDailyReportModal() {
+        const today = new Date().toISOString().split('T')[0];
+        const todaySales = sales.filter(s => s && s.date && s.date.startsWith(today));
+        
+        const total = todaySales.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+        const count = todaySales.length;
+        
+        const byMethod = todaySales.reduce((acc, s) => {
+            const method = s.method || 'Efectivo';
+            acc[method] = (acc[method] || 0) + (Number(s.total) || 0);
+            return acc;
+        }, {});
+
+        // Fill modal with data
+        const dateEl = document.getElementById('daily-report-date');
+        if (dateEl) dateEl.textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
+        const totalEl = document.getElementById('daily-total-sales');
+        if (totalEl) totalEl.textContent = `$${total.toLocaleString()}`;
+        
+        const countEl = document.getElementById('daily-sales-count');
+        if (countEl) countEl.textContent = count;
+        
+        // Detailed methods
+        const methodsContainer = document.getElementById('daily-methods-list');
+        if (methodsContainer) {
+            methodsContainer.innerHTML = '';
+            const methods = ['Efectivo', 'Tarjeta', 'Transferencia', 'A Cuenta'];
+            methods.forEach(m => {
+                const amount = byMethod[m] || 0;
+                const div = document.createElement('div');
+                div.className = 'daily-method-item';
+                div.innerHTML = `
+                    <span>${m}</span>
+                    <strong>$${amount.toLocaleString()}</strong>
+                `;
+                methodsContainer.appendChild(div);
+            });
+        }
+
+        const modal = document.getElementById('daily-report-modal');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeDailyReportModal() {
+        const modal = document.getElementById('daily-report-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function printDailyReport() {
+        const today = new Date().toISOString().split('T')[0];
+        const todaySales = sales.filter(s => s && s.date && s.date.startsWith(today));
+        
+        const total = todaySales.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+        const byMethod = todaySales.reduce((acc, s) => {
+            const method = s.method || 'Efectivo';
+            acc[method] = (acc[method] || 0) + (Number(s.total) || 0);
+            return acc;
+        }, {});
+
+        const ticketArea = document.getElementById('ticket-print-area');
+        const dateStr = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        
+        let methodsHtml = '';
+        ['Efectivo', 'Tarjeta', 'Transferencia', 'A Cuenta'].forEach(m => {
+            methodsHtml += `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>${m}:</span>
+                    <span>$${(byMethod[m] || 0).toLocaleString()}</span>
+                </div>
+            `;
+        });
+
+        ticketArea.innerHTML = `
+            <div style="width: 100%; max-width: 80mm; background: #fff; color: #000; padding: 10px; font-family: monospace;">
+                <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
+                    <h2 style="margin: 0; font-size: 18px;">${config.storeName}</h2>
+                    <h3 style="margin: 5px 0; font-size: 14px;">CIERRE DE CAJA DIARIO</h3>
+                    <p style="margin: 3px 0; font-size: 12px;">FECHA: ${dateStr}</p>
+                </div>
+                
+                <div style="border-bottom: 1px dashed #000; padding-bottom: 5px; margin-bottom: 10px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 12px; text-align: center;">RESUMEN POR METODO</h4>
+                    ${methodsHtml}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 16px; margin-bottom: 15px; border-top: 1px solid #000; padding-top: 5px;">
+                    <span>TOTAL DEL DIA:</span>
+                    <span>$${total.toLocaleString()}</span>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px; border-top: 1px solid #000; padding-top: 10px; font-size: 10px;">
+                    <p>REPORTE GENERADO EL ${new Date().toLocaleString()}</p>
+                    <p>RepuestosPOS Management</p>
+                </div>
+            </div>
+        `;
+
+        setTimeout(() => {
+            window.print();
+        }, 500);
+    }
+
+    const dailyReportBtn = document.getElementById('daily-report-btn');
+    if (dailyReportBtn) dailyReportBtn.onclick = openDailyReportModal;
+    
+    document.querySelectorAll('.close-daily-modal').forEach(btn => btn.onclick = closeDailyReportModal);
+    
+    const printDailyBtn = document.getElementById('print-daily-report');
+    if (printDailyBtn) printDailyBtn.onclick = printDailyReport;
+
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
         toast.className = 'toast-notification';

@@ -889,6 +889,8 @@
                         </div>
                     </div>
                     <div class="header-actions">
+                        <button class="primary-btn" id="daily-report-btn" title="Reporte Diario"><i
+                                class='bx bxs-pie-chart-alt-2'></i> Reporte Diario</button>
                         <button class="secondary-btn" id="export-json" title="Exportar JSON"><i
                                 class='bx bxs-file-json'></i> JSON</button>
                         <button class="secondary-btn" id="export-excel" title="Exportar Excel"><i
@@ -1184,6 +1186,44 @@
                         <!-- Dynamic Employee Sales -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Report Modal -->
+    <div id="daily-report-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <div>
+                    <h2>Reporte Diario de Ventas</h2>
+                    <p id="daily-report-date" style="color: var(--text-muted); font-size: 0.9rem;"></p>
+                </div>
+                <i class='bx bx-x close-daily-modal' style="font-size: 1.75rem; cursor: pointer;"></i>
+            </div>
+
+            <div class="daily-stats-container" style="display: grid; gap: 1.5rem;">
+                <div class="main-stat-card"
+                    style="background: rgba(59, 130, 246, 0.1); border: 1px solid var(--primary); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <span style="color: var(--text-muted); display: block; margin-bottom: 5px;">Ventas Totales
+                        Hoy</span>
+                    <h2 id="daily-total-sales" style="font-size: 2.5rem; color: var(--primary);">$0</h2>
+                    <span id="daily-sales-count-label" style="font-size: 0.9rem; color: var(--text-muted);"><span
+                            id="daily-sales-count">0</span> transacciones</span>
+                </div>
+
+                <div class="methods-breakdown">
+                    <h3 style="margin-bottom: 1rem; font-size: 1rem; font-weight: 600;">Desglose por Medio de Pago</h3>
+                    <div id="daily-methods-list" style="display: grid; gap: 10px;">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="margin-top: 2rem;">
+                <button class="secondary-btn close-daily-modal">Cerrar</button>
+                <button class="primary-btn" id="print-daily-report">
+                    <i class='bx bx-printer'></i> Imprimir Reporte
+                </button>
             </div>
         </div>
     </div>
